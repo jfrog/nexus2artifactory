@@ -173,7 +173,10 @@ class Security:
         for privxml in xml.find('privileges').findall('privilege'):
             priv, privtmp, privref = None, {}, {}
             for propxml in privxml.find('properties').findall('property'):
-                privtmp[propxml.find('key').text] = propxml.find('value').text
+                if propxml.find('value') is not None:
+                    privtmp[propxml.find('key').text] = propxml.find('value').text
+                else:
+                    privtmp[propxml.find('key').text] = ""
             name, method = privxml.find('name').text, privtmp['method']
             mthdstrs = method.split(',')
             if len(mthdstrs) == 2 and mthdstrs[1] == 'read':
