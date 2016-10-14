@@ -66,7 +66,9 @@ class Upload:
                 path = re.sub('^file:/', '/', path)
                 path = os.path.abspath(path)
             else: path = os.path.join(storage, name)
-            if not os.path.isdir(path): continue
+            if not os.path.isdir(path):
+                self.log.info("skipped " + path)
+                continue
             metapath = os.path.join(path, '.nexus', 'attributes')
             files = os.listdir(path)
             try: files.remove('.nexus')
@@ -74,6 +76,8 @@ class Upload:
             try: files.remove('.meta')
             except ValueError: pass
             try: files.remove('archetype-catalog.xml')
+            except ValueError: pass
+            try: files.remove('.index')
             except ValueError: pass
             while len(files) > 0:
                 f = files.pop()
