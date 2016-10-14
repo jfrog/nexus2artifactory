@@ -136,30 +136,42 @@ class Artifactory:
         for nrepo in self.scr.nexus.repos: nrepos[nrepo['id']] = nrepo
         repos = {}
         for res in result: repos[res['key']] = True
+        repo_json = []
         for repn, rep in conf["Repository Migration Setup"].items():
             if rep['available'] != True: continue
             if rep["Migrate This Repo"] != True: continue
+            self.log.info("Generating json for repo %s", repn)
+            self.prog.current = repn
+            self.prog.refresh()
+            nrepo = nrepos[repn]
+            jsn = {}
+            jsn['key'] = rep["Repo Name (Artifactory)"]
+            jsn['rclass'] = nrepo['class']
+            jsn['packageType'] = nrepo['type']
+            jsn['description'] = rep["Repo Description"]
+            jsn['repoLayoutRef'] = rep["Repo Layout"]
+            if jsn['rclass'] == 'local':
+                jsn['handleReleases'] = rep["Handles Releases"]
+                jsn['handleSnapshots'] = rep["Handles Snapshots"]
+            if jsn['rclass'] == 'remote':
+                jsn['handleReleases'] = rep["Handles Releases"]
+                jsn['handleSnapshots'] = rep["Handles Snapshots"]
+                jsn['url'] = rep["Remote URL"]
+            if jsn['rclass'] == 'virtual':
+                jsn['repositories'] = nrepo['repos']
+            repo_json.append(jsn)
+
+        # Don't create virtual repositories before their child-repositories are created!
+        repo_json_sorted = []
+        for jsn in repo_json:
+            self.add_repo_recursively(jsn, repo_json, repo_json_sorted)
+
+        for jsn in repo_json_sorted:
             self.log.info("Migrating repo %s -> %s.", repn,
                           rep["Repo Name (Artifactory)"])
             self.prog.current = repn + ' -> ' + rep["Repo Name (Artifactory)"]
             self.prog.refresh()
             try:
-                nrepo = nrepos[repn]
-                jsn = {}
-                jsn['key'] = rep["Repo Name (Artifactory)"]
-                jsn['rclass'] = nrepo['class']
-                jsn['packageType'] = nrepo['type']
-                jsn['description'] = rep["Repo Description"]
-                jsn['repoLayoutRef'] = rep["Repo Layout"]
-                if jsn['rclass'] == 'local':
-                    jsn['handleReleases'] = rep["Handles Releases"]
-                    jsn['handleSnapshots'] = rep["Handles Snapshots"]
-                if jsn['rclass'] == 'remote':
-                    jsn['handleReleases'] = rep["Handles Releases"]
-                    jsn['handleSnapshots'] = rep["Handles Snapshots"]
-                    jsn['url'] = rep["Remote URL"]
-                if jsn['rclass'] == 'virtual':
-                    jsn['repositories'] = nrepo['repos']
                 mthd = 'POST' if jsn['key'] in repos else 'PUT'
                 cfg = 'api/repositories/' + jsn['key']
                 self.dorequest(conn, mthd, cfg, jsn)
@@ -167,6 +179,20 @@ class Artifactory:
                 self.log.exception("Error migrating repository %s:", repn)
                 self.prog.stepsmap['Repositories'][3] += 1
             finally: self.prog.stepsmap['Repositories'][1] += 1
+
+    def add_repo_recursively(self, jsn, repo_json, repo_json_sorted, log_prefix='\t'):
+        if jsn in repo_json_sorted:
+            self.log.debug("%s%s: exists!", log_prefix, jsn['key'])
+            return
+        self.log.debug("%s%s", log_prefix, jsn['key'])
+
+        if 'repositories' in jsn:
+            for repo_child in jsn['repositories']:
+                jsn_child = next(jsn_child for jsn_child in repo_json if jsn_child['key'] == repo_child)
+                self.add_repo_recursively(jsn_child, repo_json, repo_json_sorted, log_prefix + '\t')
+
+        repo_json_sorted.append(jsn)
+        self.log.debug("%s\t=> append", log_prefix)
 
     def migrateusers(self, conn, conf):
         self.log.info("Migrating users.")
