@@ -2,6 +2,7 @@ import os
 import re
 import logging
 import xml.etree.ElementTree as ET
+import json
 from . import getBuiltinPrivs, getBuiltinPrivmap, getBuiltinRoles
 
 class Security:
@@ -101,7 +102,8 @@ class Security:
             for rolexml in mapxml.find('roles').findall('role'):
                 if rolexml.text in self.allroles:
                     user['roles'].append(self.allroles[rolexml.text])
-            users[user['username']] = user
+            if user['realm'] != 'crowd':
+                users[user['username']] = user
         self.users = users
 
     def flattenrole(self, role):
@@ -154,6 +156,8 @@ class Security:
                 for privxml in rolexml.find('privileges').findall('privilege'):
                     if privxml.text in self.allprivmap:
                         role['privileges'].append(self.allprivmap[privxml.text])
+            else:
+                continue
             if rolexml.find('roles') != None:
                 for srolexml in rolexml.find('roles').findall('role'):
                     role['roles'].append(srolexml.text)
