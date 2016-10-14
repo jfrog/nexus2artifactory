@@ -230,7 +230,7 @@ class Artifactory:
                 jsn['description'] = grp["Group Description"]
                 jsn['autoJoin'] = grp["Auto Join Users"]
                 mthd = 'POST' if jsn['name'] in grps else 'PUT'
-                cfg = 'api/security/groups/' + jsn['name']
+                cfg = 'api/security/groups/' + urllib2.quote(jsn['name'])
                 self.dorequest(conn, mthd, cfg, jsn)
             except:
                 self.log.exception("Error migrating group %s:", grpn)
@@ -274,7 +274,7 @@ class Artifactory:
                 jsn['excludesPattern'] = excpat
                 jsn['repositories'] = [repo]
                 jsn['principals'] = {'users': {}, 'groups': grps}
-                cfg = 'api/security/permissions/' + jsn['name']
+                cfg = 'api/security/permissions/' + urllib2.quote(jsn['name'])
                 self.dorequest(conn, 'PUT', cfg, jsn)
             except:
                 self.log.exception("Error migrating permission %s:", permn)
@@ -382,6 +382,7 @@ class Artifactory:
         except urllib2.HTTPError as ex:
             self.log.exception("Error making request:")
             stat = ex.code
+            self.log.debug("Response: %s", ex.read())
         except urllib2.URLError as ex:
             self.log.exception("Error making request:")
             stat = ex.reason
