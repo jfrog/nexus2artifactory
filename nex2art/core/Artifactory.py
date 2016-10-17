@@ -4,6 +4,7 @@ import sys
 import json
 import base64
 import logging
+import urllib
 import urllib2
 import urlparse
 import StringIO
@@ -161,7 +162,7 @@ class Artifactory:
                 if jsn['rclass'] == 'virtual':
                     jsn['repositories'] = nrepo['repos']
                 mthd = 'POST' if jsn['key'] in repos else 'PUT'
-                cfg = 'api/repositories/' + jsn['key']
+                cfg = 'api/repositories/' + urllib.quote(jsn['key'], '')
                 self.dorequest(conn, mthd, cfg, jsn)
             except:
                 self.log.exception("Error migrating repository %s:", repn)
@@ -193,14 +194,18 @@ class Artifactory:
                     jsn['password'] = user["Password"]
                 else:
                     jsn['password'] = defaultpasw
-                    passresets.append(jsn['name'])
+                    passresets.append(jsn['name'].lower())
                 jsn['admin'] = user["Is An Administrator"]
                 jsn['groups'] = []
                 for group in user["Groups"]:
                     if group in self.scr.nexus.security.roles:
+                        try:
+                            grp = conf["Groups Migration Setup"][group]
+                            group = grp["Group Name (Artifactory)"]
+                        except: pass
                         jsn['groups'].append(group)
                 mthd = 'POST' if jsn['name'] in usrs else 'PUT'
-                cfg = 'api/security/users/' + jsn['name']
+                cfg = 'api/security/users/' + urllib.quote(jsn['name'], '')
                 self.dorequest(conn, mthd, cfg, jsn)
             except:
                 self.log.exception("Error migrating user %s:", usern)
@@ -230,7 +235,7 @@ class Artifactory:
                 jsn['description'] = grp["Group Description"]
                 jsn['autoJoin'] = grp["Auto Join Users"]
                 mthd = 'POST' if jsn['name'] in grps else 'PUT'
-                cfg = 'api/security/groups/' + jsn['name']
+                cfg = 'api/security/groups/' + urllib.quote(jsn['name'], '')
                 self.dorequest(conn, mthd, cfg, jsn)
             except:
                 self.log.exception("Error migrating group %s:", grpn)
@@ -274,7 +279,7 @@ class Artifactory:
                 jsn['excludesPattern'] = excpat
                 jsn['repositories'] = [repo]
                 jsn['principals'] = {'users': {}, 'groups': grps}
-                cfg = 'api/security/permissions/' + jsn['name']
+                cfg = 'api/security/permissions/' + urllib.quote(jsn['name'], '')
                 self.dorequest(conn, 'PUT', cfg, jsn)
             except:
                 self.log.exception("Error migrating permission %s:", permn)

@@ -93,7 +93,8 @@ class Security:
         urmxml = xml.find('userRoleMappings')
         if urmxml == None: return
         for mapxml in urmxml.findall('userRoleMapping'):
-            user = {'username': mapxml.find('userId').text}
+            user = {'email': None, 'enabled': True}
+            user['username'] = mapxml.find('userId').text
             if user['username'] in users: user = users[user['username']]
             user['realm'] = mapxml.find('source').text.lower()
             if user['realm'] == 'default': user['realm'] = 'internal'
@@ -118,7 +119,7 @@ class Security:
     def consolidateprivs(self, role):
         privs, privmap, consprivs = {}, {}, []
         for privref in role['privileges']:
-            if privref['type'] == 'target':
+            if 'methods' not in privref and privref['type'] == 'target':
                 privname = privref['priv']['name']
                 if privname in privs and privname in privmap:
                     privs[privname].append(privref['method'])
