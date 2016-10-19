@@ -175,8 +175,8 @@ class Artifactory:
                 mthd = 'POST' if jsn['key'] in repos else 'PUT'
                 cfg = 'api/repositories/' + urllib.quote(jsn['key'], '')
                 self.dorequest(conn, mthd, cfg, jsn)
-            except:
-                self.log.exception("Error migrating repository %s:", repn)
+            except urllib2.HTTPError as e:
+                self.log.exception("Error migrating repository %s: %s", jsn['key'], json.dumps(e.read(), indent=2))
                 self.prog.stepsmap['Repositories'][3] += 1
             finally: self.prog.stepsmap['Repositories'][1] += 1
 
