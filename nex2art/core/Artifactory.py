@@ -175,8 +175,8 @@ class Artifactory:
                 mthd = 'POST' if jsn['key'] in repos else 'PUT'
                 cfg = 'api/repositories/' + urllib.quote(jsn['key'], '')
                 self.dorequest(conn, mthd, cfg, jsn)
-            except urllib2.HTTPError as e:
-                self.log.exception("Error migrating repository %s: %s", jsn['key'], json.dumps(e.read(), indent=2))
+            except:
+                self.log.exception("Error migrating repository %s", jsn['key'])
                 self.prog.stepsmap['Repositories'][3] += 1
             finally: self.prog.stepsmap['Repositories'][1] += 1
 
@@ -409,6 +409,7 @@ class Artifactory:
         url = urlparse.urlunsplit((scheme, host, rootpath + path, '', ''))
         req = MethodRequest(url, body, headers, method=method)
         self.log.info("Sending %s request to %s.", method, url)
+        error_response = ""
         try:
             resp = urllib2.urlopen(req)
             stat = resp.getcode()
@@ -416,11 +417,12 @@ class Artifactory:
         except urllib2.HTTPError as ex:
             self.log.exception("Error making request:")
             stat = ex.code
+            error_response = "\n" + json.dumps(ex.read(), indent=2)
         except urllib2.URLError as ex:
             self.log.exception("Error making request:")
             stat = ex.reason
         if not isinstance(stat, (int, long)) or stat < 200 or stat >= 300:
-            msg = "Unable to " + method + " " + path + ": " + str(stat) + "."
+            msg = "Unable to " + method + " " + path + ": " + str(stat) + "." + error_response
             raise MigrationError(msg)
         try:
             if self.json.match(ctype) != None: msg = json.load(resp)
