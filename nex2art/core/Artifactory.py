@@ -168,9 +168,8 @@ class Artifactory:
             self.add_repo_recursively(jsn, repo_json, repo_json_sorted)
 
         for jsn in repo_json_sorted:
-            self.log.info("Migrating repo %s -> %s.", repn,
-                          rep["Repo Name (Artifactory)"])
-            self.prog.current = repn + ' -> ' + rep["Repo Name (Artifactory)"]
+            self.log.info("Migrating repo %s.", jsn['key'])
+            self.prog.current = jsn['key']
             self.prog.refresh()
             try:
                 mthd = 'POST' if jsn['key'] in repos else 'PUT'
