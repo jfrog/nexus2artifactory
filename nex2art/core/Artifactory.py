@@ -409,7 +409,6 @@ class Artifactory:
         url = urlparse.urlunsplit((scheme, host, rootpath + path, '', ''))
         req = MethodRequest(url, body, headers, method=method)
         self.log.info("Sending %s request to %s.", method, url)
-        error_response = ""
         try:
             resp = urllib2.urlopen(req)
             stat = resp.getcode()
@@ -417,12 +416,12 @@ class Artifactory:
         except urllib2.HTTPError as ex:
             self.log.exception("Error making request:")
             stat = ex.code
-            error_response = "\n" + json.dumps(ex.read(), indent=2)
+            self.log.debug(json.dumps(ex.read(), indent=2))
         except urllib2.URLError as ex:
             self.log.exception("Error making request:")
             stat = ex.reason
         if not isinstance(stat, (int, long)) or stat < 200 or stat >= 300:
-            msg = "Unable to " + method + " " + path + ": " + str(stat) + "." + error_response
+            msg = "Unable to " + method + " " + path + ": " + str(stat) + "."
             raise MigrationError(msg)
         try:
             if self.json.match(ctype) != None: msg = json.load(resp)
