@@ -192,6 +192,7 @@ class Artifactory:
                     jsn_child = next(jsn_child for jsn_child in repo_json if jsn_child['key'] == repo_child)
                 except StopIteration:
                     self.log.info("%s\t%s: will not be imported, skip!", log_prefix, repo_child)
+                    jsn['repositories'].remove(repo_child)
                     continue
                 self.add_repo_recursively(jsn_child, repo_json, repo_json_sorted, log_prefix + '\t')
 
