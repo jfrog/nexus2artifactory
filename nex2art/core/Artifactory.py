@@ -165,7 +165,7 @@ class Artifactory:
         # Don't create virtual repositories before their child-repositories are created!
         repo_json_sorted = []
         for jsn in repo_json:
-            self.add_repo_recursively(jsn, repo_json, repo_json_sorted)
+            self.add_repo_recursively(jsn, repo_json, repo_json_sorted, nrepos)
 
         for jsn in repo_json_sorted:
             self.log.info("Migrating repo %s.", jsn['key'])
@@ -180,7 +180,7 @@ class Artifactory:
                 self.prog.stepsmap['Repositories'][3] += 1
             finally: self.prog.stepsmap['Repositories'][1] += 1
 
-    def add_repo_recursively(self, jsn, repo_json, repo_json_sorted, log_prefix='\t'):
+    def add_repo_recursively(self, jsn, repo_json, repo_json_sorted, nrepos, log_prefix='\t'):
         if jsn in repo_json_sorted:
             self.log.debug("%s%s: exists!", log_prefix, jsn['key'])
             return
@@ -192,7 +192,8 @@ class Artifactory:
                     jsn_child = next(jsn_child for jsn_child in repo_json if jsn_child['key'] == repo_child)
                 except StopIteration:
                     self.log.info("%s\t%s: will not be imported, skip!", log_prefix, repo_child)
-                    jsn['repositories'].remove(repo_child)
+                    if repo_child not in nrepos:
+                        jsn['repositories'].removqe(repo_child)
                     continue
                 self.add_repo_recursively(jsn_child, repo_json, repo_json_sorted, log_prefix + '\t')
 
