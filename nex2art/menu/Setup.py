@@ -56,7 +56,8 @@ class Setup(Menu):
                 resp = urllib2.urlopen(req)
                 stat = resp.getcode()
             except urllib2.HTTPError as ex:
-                self.log.exception("Error connecting to Artifactory:")
+                msg = "Error connecting to Artifactory:\n%s"
+                self.log.exception(msg, ex.read())
                 stat = ex.code
             except urllib2.URLError as ex:
                 self.log.exception("Error connecting to Artifactory:")
