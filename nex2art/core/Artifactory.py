@@ -416,7 +416,7 @@ class Artifactory:
             stat = resp.getcode()
             ctype = resp.info().get('Content-Type', 'application/octet-stream')
         except urllib2.HTTPError as ex:
-            self.log.exception("Error making request:")
+            self.log.exception("Error making request:\n%s", ex.read())
             stat = ex.code
             self.log.debug(json.dumps(ex.read(), indent=2))
         except urllib2.URLError as ex:
