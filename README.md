@@ -48,6 +48,14 @@ To run the tool, run `./NexusToArtifactory.py`.
 
 If using the included Windows exe file, instead run `NexusToArtifactory.exe`.
 
+### Using Docker ###
+
+The tool can be run as a docker container also. We can achieve it using the following command
+
+`docker run -it -v <Sonatype-WorkDir>:<Mount-Folder> dropbox-jfrog-support-public-docker.jfrog.io/nexus2artifactory`
+
+Since we need to provide the Nexus data directory for the migration process, in a docker setup we need to mount the work directory to a folder within container. Further, we will be providing the mount directory within the container as Nexus Data Directory while setting up the environment for migration.
+
 ![Main Menu Screenshot](doc/mainMenu.png)
 
 All options can be accessed by typing the appropriate key on the keyboard. The
