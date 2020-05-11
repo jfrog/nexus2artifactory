@@ -117,6 +117,8 @@ type <kbd>q</kbd> to go back to the main menu.
 
 ![Main Menu Screenshot With Error](doc/mainErr.png)
 
+* If you receive an error while connecting to Nexus, for 3.21.2 Nexus disabled the scripting related features for security reasons. This affects scripts as used through the Script REST API. This line should be added to $data-dir/etc/nexus.properties: ```nexus.scripts.allowCreation=true``` in order to resolve that and allow the API.
+
 By this point, the tool has generated an initial configuration for the
 migration, and all the settings have been set accordingly, but sometimes the
 default settings need to be modified further. If there are any settings that
