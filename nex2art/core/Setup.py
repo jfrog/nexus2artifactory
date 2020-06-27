@@ -89,7 +89,8 @@ class Setup(object):
             "migrate immediately without displaying the UI (requires -f)",
             "suppress logging to the console in non-interactive mode",
             "maximum number of attempts to upload each artifact before failure",
-            "number of threads to use when migrating artifacts"]
+            "number of threads to use when migrating artifacts",
+            "disable migration of users, groups, and permissions"]
         chcs = 'error', 'warning', 'info', 'debug'
         filt = PosIntFilter()
         parser = argparse.ArgumentParser(description=help[0])
@@ -108,6 +109,8 @@ class Setup(object):
                             default=3, help=help[8])
         parser.add_argument('-t', '--threads', type=int, choices=filt,
                             default=4, help=help[9])
+        parser.add_argument('-d', '--disable-security-migration',
+                            action='store_true', help=help[10])
         args = parser.parse_args(self.argssource)
         if args.load_file == None and args.non_interactive:
             parser.error("option --load-file is required for non-interactive mode")

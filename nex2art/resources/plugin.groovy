@@ -155,11 +155,19 @@ def getLdapData() {
 
 def getData() {
     def data = [:]
-    data.users = userData
-    data.groups = groupData
-    data.privs = permissionData
-    data.selectors = selectorData
-    data.ldaps = ldapData
+    if (SKIPSEC) {
+        data.users = []
+        data.groups = []
+        data.privs = []
+        data.selectors = []
+        data.ldaps = []
+    } else {
+        data.users = userData
+        data.groups = groupData
+        data.privs = permissionData
+        data.selectors = selectorData
+        data.ldaps = ldapData
+    }
     data.repos = repoData
     data.blobstores = blobstoreData
     return new JsonBuilder(data).toPrettyString()

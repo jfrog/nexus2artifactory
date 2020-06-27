@@ -295,6 +295,9 @@ Other commandline options are as follows:
 - `-o`, `--force-tls10`: Forces TLSv1.0 to be used when HTTPS is used. Some
   SSL libraries have a bug that prevents them from properly using TLSv1.1 or
   later. If you have trouble connecting with HTTPS, try enabling this.
+- `-d`, `--disable-security-migration`: Disables migration of users, groups
+  (roles), and permissions (privileges). This can improve the speed of use if
+  only repositories are to be migrated.
 - `-h`, `--help`: Print help message, which describes all of these options.
 
 Testing

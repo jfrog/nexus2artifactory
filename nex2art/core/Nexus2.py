@@ -60,9 +60,10 @@ class Nexus2(object):
             self.log.exception("Error reading Nexus config:")
             return "Configuration file nexus.xml is not valid."
         repos.sort(key=lambda x: x['class'])
-        self.ldap.refresh(path)
-        secrtn = self.security.refresh(path, targs, repos)
-        if secrtn != True: return secrtn
+        if not self.scr.args.disable_security_migration:
+            self.ldap.refresh(path)
+            secrtn = self.security.refresh(path, targs, repos)
+            if secrtn != True: return secrtn
         self.repos = repos
         self.repomap = repomap
         self.path = path

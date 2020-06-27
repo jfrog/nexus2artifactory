@@ -129,7 +129,7 @@ class Upload(object):
     def filelistgenerator3(self, conf):
         repomap = self.scr.nexus.repomap
         storage = os.path.join(self.scr.nexus.path, 'blobs')
-        repos, stores = [], {}
+        repos, stores, paths = [], {}, []
         for name, src in conf["Repository Migration Setup"].items():
             if not isinstance(src, dict): continue
             self.reponames[src["Repo Name (Artifactory)"]] = name
@@ -148,12 +148,11 @@ class Upload(object):
                     msg += "filestore, skipping artifact migration."
                     self.log.info(msg)
         for storen, store in stores.items():
-            if store['type'] != 'File' or 'path' not in store:
-                msg = "Filestore '" + storen + "' with type '" + store['type']
-                msg += "' is not supported, skipping artifact migration."
-                self.log.info(msg)
-                continue
-            storedir = os.path.join(storage, store['path'], 'content')
+            for path in store['paths']:
+                if path not in paths:
+                    paths.append(path)
+        for path in paths:
+            storedir = os.path.join(storage, path, 'content')
             if not os.path.isdir(storedir): continue
             for vol in os.listdir(storedir):
                 if not vol.startswith('vol-'): continue

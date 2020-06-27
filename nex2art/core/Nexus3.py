@@ -47,10 +47,8 @@ class Nexus3(object):
                 data = self.requestData('service/siesta/rest/v1/script')
             if isinstance(data, basestring): return data
             path = os.path.abspath(path)
-            repos, repomap, stores = [], {}, {}
-            for store in data['blobstores']:
-                storedata = self.getstore(store)
-                stores[storedata['name']] = storedata
+            stores = self.getstores(data)
+            repos, repomap = [], {}
             for repo in data['repos']:
                 repodata = self.getrepo(repo, stores)
                 repos.append(repodata)
@@ -60,21 +58,32 @@ class Nexus3(object):
             self.log.exception("Error reading repository config.")
             return "Error reading repository config."
         repos.sort(key=lambda x: x['class'])
-        self.ldap.refresh(data)
-        secrtn = self.security.refresh(data)
-        if secrtn != True: return secrtn
+        if not self.scr.args.disable_security_migration:
+            self.ldap.refresh(data)
+            secrtn = self.security.refresh(data)
+            if secrtn != True: return secrtn
         self.repos = repos
         self.repomap = repomap
         self.path = path
         return True
 
-    def getstore(self, store):
-        storedata = {}
-        storedata['name'] = store['name']
-        storedata['type'] = store['type']
-        if store['type'] == 'File':
-            storedata['path'] = store['attributes']['file']['path']
-        return storedata
+    def getstores(self, data):
+        stores, tmps = {}, []
+        for store in data['blobstores']:
+            storedata = {}
+            storedata['name'] = store['name']
+            storedata['type'] = store['type']
+            if store['type'] == 'File':
+                storedata['paths'] = [store['attributes']['file']['path']]
+            else:
+                storedata['paths'] = []
+            if store['type'] == 'Group':
+                tmps.append((storedata, store))
+            stores[storedata['name']] = storedata
+        for storedata, store in tmps:
+            for member in store['attributes']['group']['members']:
+                storedata['paths'].extend(stores[member]['paths'])
+        return stores
 
     def getrepo(self, repo, stores):
         # TODO New repodatas:
@@ -148,7 +157,11 @@ class Nexus3(object):
         depheaders['Content-Type'] = 'application/json'
         runheaders['Content-Type'] = 'text/plain'
         depjson = {'name': 'artifactorymigrator', 'type': 'groovy'}
-        depjson['content'] = pkgutil.get_data('nex2art', 'resources/plugin.groovy')
+        groovy = pkgutil.get_data('nex2art', 'resources/plugin.groovy')
+        if self.scr.args.disable_security_migration:
+            depjson['content'] = groovy.replace('SKIPSEC', 'true')
+        else:
+            depjson['content'] = groovy.replace('SKIPSEC', 'false')
         depbody = json.dumps(depjson)
         res, data = None, None
         self.log.info("Deploying extraction plugin to Nexus.")

@@ -20,8 +20,10 @@ class Main(Menu):
         def validate(_): self.scr.validate()
         self.opts = [
             self.mkopt('i', "Initial Setup", [self.submenu(Setup), validate]),
-            self.mkopt('r', "Repository Migration Setup", self.submenu(Repo)),
-            self.mkopt('u', "Security Migration Setup", self.submenu(Security)),
+            self.mkopt('r', "Repository Migration Setup", self.submenu(Repo))]
+        if not self.scr.args.disable_security_migration:
+            self.opts.append(self.mkopt('u', "Security Migration Setup", self.submenu(Security)))
+        self.opts.extend([
             # self.mkopt('o', "Options Migration Setup", self.submenu(Options)),
             None,
             self.saveopt,
@@ -30,7 +32,7 @@ class Main(Menu):
             self.mkopt('x', "Run Migration", self.runmigration, save=False),
             None,
             self.mkopt('h', "Help", '?'),
-            self.mkopt('q', "Exit", None, hdoc=False)]
+            self.mkopt('q', "Exit", None, hdoc=False)])
         self.scr.artifactory.checkArtifactory()
         self.scr.nexus.checkNexus()
         self.scr.validate()
