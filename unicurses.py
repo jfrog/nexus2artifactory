@@ -18,6 +18,8 @@
 import sys
 import os
 import locale
+reload(sys)
+sys.setdefaultencoding('utf8')
 global pdlib
 global NCURSES
 global PDC_LEAVEOK
