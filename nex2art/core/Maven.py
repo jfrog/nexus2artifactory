@@ -10,7 +10,9 @@ class Maven(object):
         fname = os.path.basename(repopath)
         if fname == 'pom.xml' or fname.endswith('.pom'):
             pom = localpath, metapath, repo, repopath
-            with self.lock: self.poms.append(pom)
+            with self.lock:
+                if pom not in self.poms:
+                    self.poms.append(pom)
             return []
         return [(localpath, metapath, repo, repopath, {})]
 
