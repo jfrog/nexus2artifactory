@@ -270,6 +270,7 @@ class Upload(object):
 
     def deployChecksum(self, url, headers):
         chksumheaders = {'X-Checksum-Deploy': 'true'}
+        chksumheaders['Content-Length'] = 0
         chksumheaders.update(headers)
         req = PutRequest(url, headers=chksumheaders)
         try:
