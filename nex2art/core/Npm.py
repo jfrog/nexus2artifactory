@@ -23,7 +23,12 @@ class Npm(object):
 
     def deployPaths(self, localpath, metapath, repo, repopath):
         parts = repopath.split('/')
-        if '-' in parts: return [(localpath, metapath, repo, repopath, {})]
+        if '-' in parts:
+            if len(parts) >= 3 and parts[1][0] == '@' and parts[-2] == '-':
+                newparts = parts[:-1] + [parts[1], parts[-1]]
+                return [(localpath, metapath, repo, '/'.join(newparts), {})]
+            else:
+                return [(localpath, metapath, repo, repopath, {})]
         if self.checkMeta(metapath) and self.checkContent(localpath, parts[-1]):
             msg = "Artifactory will regenerate this metadata file"
             self.log.info("Skipping artifact %s, %s", repo + repopath, msg)
