@@ -13,7 +13,7 @@ class Nexus2Test(unittest.TestCase):
     def tearDown(self):
         self.nexus = None
 
-    # Test for Yum repo detecetion
+    # Test for Yum repo detection
     def test_getYumCapabilities(self):
         self.assertEqual(self.nexus.getYumCapabilities(
             os.path.join(self.resourcesDir, 'nonexistent.xml')), [])
