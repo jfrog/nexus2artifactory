@@ -118,6 +118,8 @@ Nexus 3 does not make all of its data available on the filesystem like Nexus 2
 does, so the tool must connect to the instance to retrieve some of the
 information.
 
+**Note:** For Windows 10 (DOS command window) that is running behind a proxy, install [CNTLM](https://stackoverflow.com/a/29925732/6761668) to point to the proxy and set WinHTTP to point to the local CNTLM and then run theNexusToArtifactory.exe to avoid connectivity issues to Artifactory server.
+
 ![Setup Menu Screenshot With Filled Options](doc/setupFilled.png)
 
 Once the Nexus and Artifactory instances have both been successfully connected,
