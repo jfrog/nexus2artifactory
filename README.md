@@ -2,7 +2,7 @@
 # ⚠️ DEPRECATED - NexusToArtifactory
 
 The JFrog NexusToArtifactory migrator has been deprecated and replaced with the new Nexus to Artifactory Migrator tool.
-To learn more about the new tool, and to download and use it, see  [Migrating from Sonatype Nexus Repository to Artifactory](https://www.jfrog.com/confluence/display/JFROG/Migrating+from+Sonatype+Nexus+Repository+To+Artifactory)
+To learn more about the new tool, and to download and use it, see  [Migrating from Sonatype Nexus Repository Manager to Artifactory](https://www.jfrog.com/confluence/display/JFROG/Migrating+from+Sonatype+Nexus+Repository+Manager+to+Artifactory)
 
 
 ----
